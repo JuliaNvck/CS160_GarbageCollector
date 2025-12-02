@@ -1,0 +1,91 @@
+struct list {
+  f1: int
+  f2: &list
+}
+
+fn main() -> int {
+let _const_0:int, _const_1:int, _const_11:int, _const_2:int, _inner2:&int, _inner5:&&list, _tmp1:&list, _tmp3:int, _tmp4:int, a:&list, b:&list, c:&list, d:&list, i:int
+
+entry:
+  _const_0 = $const 0
+  _const_1 = $const 1
+  _const_11 = $const 11
+  _const_2 = $const 2
+  a = $alloc_single list
+  b = $copy a
+  _inner2 = $gfp a list::f1
+  _tmp3 = $load _inner2
+  _tmp4 = $cmp ne _tmp3 _const_0
+  _tmp3 = $copy _tmp4
+  $branch _tmp3 lbl5 lbl4
+
+lbl1:
+  $ret _const_0
+
+lbl10:
+  _inner5 = $gfp a list::f2
+  a = $load _inner5
+  _tmp1 = $alloc_single list
+  _inner5 = $gfp d list::f2
+  $store _inner5 _tmp1
+  _tmp1 = $copy __NULL
+  _inner5 = $gfp d list::f2
+  d = $load _inner5
+  _tmp3 = $arith mul i _const_2
+  _inner2 = $gfp d list::f1
+  $store _inner2 _tmp3
+  _tmp3 = $arith add i _const_1
+  i = $copy _tmp3
+  $jump lbl9
+
+lbl11:
+  a = $copy __NULL
+  a = $alloc_single list
+  $ret _const_0
+
+lbl2:
+  $jump lbl3
+
+lbl3:
+  c = $alloc_single list
+  d = $copy c
+  $jump lbl6
+
+lbl4:
+  _inner5 = $gfp a list::f2
+  _tmp1 = $load _inner5
+  _tmp4 = $cmp ne _tmp1 __NULL
+  _tmp1 = $copy __NULL
+  _tmp3 = $copy _tmp4
+  $jump lbl5
+
+lbl5:
+  $branch _tmp3 lbl1 lbl2
+
+lbl6:
+  _tmp3 = $cmp lt i _const_11
+  $branch _tmp3 lbl7 lbl8
+
+lbl7:
+  _tmp1 = $alloc_single list
+  _inner5 = $gfp b list::f2
+  $store _inner5 _tmp1
+  _tmp1 = $copy __NULL
+  _inner5 = $gfp b list::f2
+  b = $load _inner5
+  _inner2 = $gfp b list::f1
+  $store _inner2 i
+  _tmp3 = $arith add i _const_1
+  i = $copy _tmp3
+  $jump lbl6
+
+lbl8:
+  b = $copy __NULL
+  i = $copy _const_0
+  $jump lbl9
+
+lbl9:
+  _tmp3 = $cmp lt i _const_11
+  $branch _tmp3 lbl10 lbl11
+}
+

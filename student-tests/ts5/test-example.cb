@@ -1,0 +1,40 @@
+// multi stack frame
+// one level of indirection
+// no aliasing
+//
+// heap size | result |
+// ----------+--------+
+//        32 | fin    |
+//        16 | oom    |
+
+struct foo {
+	val1: int,
+	val2: int,
+	val3: int
+}
+
+fn my_func() -> int {
+    let a : [int], b: &foo;
+
+    //we should have used 8 words coming into this function, with 4 marked for gc
+    a = [int ; 2];  //this should trigger gc on 16 word heap
+    b = new foo;    //this should trigger gc on 16 word heap and run out of memory 
+    
+    a = nil;
+    a = [int ; 4];  //this should trigger gc on 32 word heap
+	
+	return 0;
+}
+
+fn main() -> int {
+    let a : [int], b: &foo;
+    
+    a = [int ; 3];
+    b = new foo;
+    
+    a = nil;
+	
+	my_func();
+	
+	return 0;
+}

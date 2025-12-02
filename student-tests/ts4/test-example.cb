@@ -1,0 +1,76 @@
+// single stack frame
+// many levels of indirection
+// aliasing
+//
+// heap size | result |
+// ----------+--------+
+//        130 | fin   |
+//        126 | oom   |
+
+struct tree {
+  val: int,
+  children: [&tree],
+  parent: &tree
+}
+
+fn main() -> int {
+  let a:&tree, b:&tree, c:&tree, d:&tree, i:int, t:int;
+
+  a = make_node(0, nil);
+  b = a;
+
+  while i < 4 {
+    b.children[0] = make_node(i, b);
+    b = b.children[0];
+    i = i + 1;
+  }
+
+  b = a;
+  i = 0;
+
+  while i < 4 {
+    b.children[1] = make_node(i, b);
+    b = b.children[1];
+    i = i + 1;
+  }
+
+  t = sum_tree(a);
+
+  b = a.children[0].children[0];
+  b.parent = nil;
+  c = a.children[1];
+  c.parent = nil;
+
+  // inline make_node so main is the only stack frame when gc triggers
+  a = nil;
+  a = new tree;
+  a.val = -1;
+  a.children = [&tree;2];
+  
+  c = c.children[1];
+  d = new tree;
+  d.children = [&tree; 4];
+
+  return 0;
+}
+
+// allocates 7 words
+fn make_node(val:int, parent:&tree) -> &tree {
+  let a:&tree;
+  a = new tree;
+
+  if a.val != 0 or a.children != nil or a.parent != nil {
+    return nil;
+  }
+
+  a.val = val;
+  a.children = [&tree;2];
+  a.parent = parent;
+  return a;
+}
+
+fn sum_tree(r:&tree) -> int {
+  if r == nil { return 0; }
+  return r.val + sum_tree(r.children[0]) + sum_tree(r.children[1]);
+}
+

@@ -1,0 +1,59 @@
+_cflat_init_gc: allocated heap of 8 words
+_cflat_alloc: attempting to allocate 2 words...successful
+_cflat_alloc: attempting to allocate 4 words...triggering collection
+gc: processing stack frame 0 (from top of stack), with 6 pointers
+-- processing pointer offset 0
+-- processing pointer offset 1
+-- processing pointer offset 2
+-- processing pointer offset 3
+-- processing pointer offset 4
+-- processing pointer offset 5
+gc: starting scan
+gc: swapping from and to spaces (0 words still live)
+_cflat_alloc: second attempt to allocate 4 words...successful
+_cflat_alloc: attempting to allocate 2 words...triggering collection
+gc: processing stack frame 0 (from top of stack), with 6 pointers
+-- processing pointer offset 0
+-- processing pointer offset 1
+-- processing pointer offset 2
+-- processing pointer offset 3
+-- processing pointer offset 4
+-- processing pointer offset 5
+gc: starting scan
+gc: swapping from and to spaces (0 words still live)
+_cflat_alloc: second attempt to allocate 2 words...successful
+_cflat_alloc: attempting to allocate 2 words...successful
+_cflat_alloc: attempting to allocate 2 words...triggering collection
+gc: processing stack frame 0 (from top of stack), with 6 pointers
+-- processing pointer offset 0
+-- processing pointer offset 1
+-- processing pointer offset 2
+-- processing pointer offset 3
+-- processing pointer offset 4
+-- processing pointer offset 5
+---- copying object at relative address 3 with header [Array, len = 1, ptrs = false]
+---- moving object from relative address 3 to 1
+gc: starting scan
+-- scanning header [Array, len = 1, ptrs = false]
+-- incrementing scanning ptr by 2
+gc: swapping from and to spaces (2 words still live)
+_cflat_alloc: second attempt to allocate 2 words...successful
+_cflat_alloc: attempting to allocate 4 words...triggering collection
+gc: processing stack frame 0 (from top of stack), with 6 pointers
+-- processing pointer offset 0
+-- processing pointer offset 1
+-- processing pointer offset 2
+-- processing pointer offset 3
+-- processing pointer offset 4
+---- copying object at relative address 3 with header [Array, len = 1, ptrs = false]
+---- moving object from relative address 3 to 1
+-- processing pointer offset 5
+---- copying object at relative address 1 with header [Array, len = 1, ptrs = false]
+---- moving object from relative address 1 to 3
+gc: starting scan
+-- scanning header [Array, len = 1, ptrs = false]
+-- incrementing scanning ptr by 2
+-- scanning header [Array, len = 1, ptrs = false]
+-- incrementing scanning ptr by 2
+gc: swapping from and to spaces (4 words still live)
+_cflat_alloc: second attempt to allocate 4 words...out of memory

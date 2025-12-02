@@ -1,0 +1,27 @@
+_cflat_init_gc: allocated heap of 32 words
+_cflat_alloc: attempting to allocate 4 words...successful
+_cflat_alloc: attempting to allocate 4 words...successful
+_cflat_alloc: attempting to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 4 words...successful
+_cflat_alloc: attempting to allocate 5 words...triggering collection
+gc: processing stack frame 0 (from top of stack), with 4 pointers
+-- processing pointer offset 0
+-- processing pointer offset 1
+-- processing pointer offset 2
+-- processing pointer offset 3
+---- copying object at relative address 12 with header [Struct, size = 3, ptr offsets = none]
+---- moving object from relative address 12 to 1
+gc: processing stack frame 1 (from top of stack), with 4 pointers
+-- processing pointer offset 0
+-- processing pointer offset 1
+-- processing pointer offset 2
+-- processing pointer offset 3
+---- copying object at relative address 5 with header [Struct, size = 3, ptr offsets = none]
+---- moving object from relative address 5 to 5
+gc: starting scan
+-- scanning header [Struct, size = 3, ptr offsets = none]
+-- incrementing scanning ptr by 4
+-- scanning header [Struct, size = 3, ptr offsets = none]
+-- incrementing scanning ptr by 4
+gc: swapping from and to spaces (8 words still live)
+_cflat_alloc: second attempt to allocate 5 words...successful

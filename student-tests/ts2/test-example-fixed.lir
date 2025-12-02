@@ -1,0 +1,24 @@
+struct foo {
+  val1: int
+  val2: int
+}
+
+fn main() -> int {
+let _const_0:int, _const_4:int, _const_7:int, _tmp1:&foo, _tmp2:[int], a1:[int], a2:[int], s1:&foo, s2:&foo
+
+entry:
+  _const_0 = $const 0
+  _const_4 = $const 4
+  _const_7 = $const 7
+  s1 = $alloc_single foo
+  a1 = $alloc_array _const_4 int
+  a2 = $copy a1
+  s1 = $copy __NULL
+  s1 = $alloc_single foo
+  s2 = $alloc_single foo
+  a2 = $copy __NULL
+  a1 = $copy __NULL
+  a2 = $alloc_array _const_7 int
+  $ret _const_0
+}
+

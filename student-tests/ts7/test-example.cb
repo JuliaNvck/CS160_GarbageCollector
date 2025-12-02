@@ -1,0 +1,25 @@
+// multiple stack frames
+// multiple levels of indirection
+// no aliasing
+//
+//
+// heap size | result |
+// ----------+--------+
+//        60 | fin    |
+//        50 | oom    |
+
+fn main() -> int {
+  foo(6);
+  return 0;
+}
+
+fn foo(p:int) -> int {
+  let a:[&int], b:&int;
+  if p == 0 { return 0; }
+  a = [&int; 2];
+  if a[0] != nil { return 0; }
+  a[0] = new int;
+  a[0] = nil;
+  a[1] = new int;
+  return foo(p - 1);
+}

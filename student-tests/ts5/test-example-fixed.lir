@@ -1,0 +1,35 @@
+funptr my_func: &() -> int
+
+struct foo {
+  val1: int
+  val2: int
+  val3: int
+}
+
+fn main() -> int {
+let _const_0:int, _const_3:int, _tmp1:[int], _tmp2:&foo, a:[int], b:&foo
+
+entry:
+  _const_0 = $const 0
+  _const_3 = $const 3
+  a = $alloc_array _const_3 int
+  b = $alloc_single foo
+  a = $copy __NULL
+  $call my_func()
+  $ret _const_0
+}
+
+fn my_func() -> int {
+let _const_0:int, _const_2:int, _const_4:int, _tmp1:[int], _tmp2:&foo, a:[int], b:&foo
+
+entry:
+  _const_0 = $const 0
+  _const_2 = $const 2
+  _const_4 = $const 4
+  a = $alloc_array _const_2 int
+  b = $alloc_single foo
+  a = $copy __NULL
+  a = $alloc_array _const_4 int
+  $ret _const_0
+}
+

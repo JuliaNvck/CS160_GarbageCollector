@@ -1,0 +1,734 @@
+_cflat_init_gc: allocated heap of 78 words
+_cflat_alloc: attempting to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...triggering collection
+gc: processing stack frame 0 (from top of stack), with 5 pointers
+-- processing pointer offset 0
+-- processing pointer offset 1
+---- copying object at relative address 7 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 7 to 1
+-- processing pointer offset 2
+-- processing pointer offset 3
+---- copying object at relative address 4 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 4 to 4
+-- processing pointer offset 4
+---- copying object at relative address 4 with header [Forwarded]
+---- object forwarded to relative address 4
+gc: starting scan
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 10 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 10 to 7
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 13 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 13 to 10
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 16 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 16 to 13
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 19 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 19 to 16
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 22 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 22 to 19
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 25 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 25 to 22
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 28 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 28 to 25
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 31 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 31 to 28
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 34 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 34 to 31
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 37 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 37 to 34
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+gc: swapping from and to spaces (36 words still live)
+_cflat_alloc: second attempt to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...triggering collection
+gc: processing stack frame 0 (from top of stack), with 5 pointers
+-- processing pointer offset 0
+-- processing pointer offset 1
+---- copying object at relative address 7 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 7 to 1
+-- processing pointer offset 2
+-- processing pointer offset 3
+---- copying object at relative address 4 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 4 to 4
+-- processing pointer offset 4
+---- copying object at relative address 37 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 37 to 7
+gc: starting scan
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 10 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 10 to 10
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 37 with header [Forwarded]
+---- object forwarded to relative address 7
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 13 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 13 to 13
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 16 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 16 to 16
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 19 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 19 to 19
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 22 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 22 to 22
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 25 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 25 to 25
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 28 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 28 to 28
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 31 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 31 to 31
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 34 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 34 to 34
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+gc: swapping from and to spaces (36 words still live)
+_cflat_alloc: second attempt to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...triggering collection
+gc: processing stack frame 0 (from top of stack), with 5 pointers
+-- processing pointer offset 0
+-- processing pointer offset 1
+---- copying object at relative address 10 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 10 to 1
+-- processing pointer offset 2
+-- processing pointer offset 3
+---- copying object at relative address 4 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 4 to 4
+-- processing pointer offset 4
+---- copying object at relative address 37 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 37 to 7
+gc: starting scan
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 13 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 13 to 10
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 7 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 7 to 13
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 16 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 16 to 16
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 37 with header [Forwarded]
+---- object forwarded to relative address 7
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 19 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 19 to 19
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 22 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 22 to 22
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 25 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 25 to 25
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 28 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 28 to 28
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 31 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 31 to 31
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 34 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 34 to 34
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+gc: swapping from and to spaces (36 words still live)
+_cflat_alloc: second attempt to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...triggering collection
+gc: processing stack frame 0 (from top of stack), with 5 pointers
+-- processing pointer offset 0
+-- processing pointer offset 1
+---- copying object at relative address 10 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 10 to 1
+-- processing pointer offset 2
+-- processing pointer offset 3
+---- copying object at relative address 4 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 4 to 4
+-- processing pointer offset 4
+---- copying object at relative address 37 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 37 to 7
+gc: starting scan
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 16 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 16 to 10
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 13 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 13 to 13
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 19 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 19 to 16
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 7 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 7 to 19
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 22 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 22 to 22
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 37 with header [Forwarded]
+---- object forwarded to relative address 7
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 25 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 25 to 25
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 28 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 28 to 28
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 31 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 31 to 31
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 34 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 34 to 34
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+gc: swapping from and to spaces (36 words still live)
+_cflat_alloc: second attempt to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...triggering collection
+gc: processing stack frame 0 (from top of stack), with 5 pointers
+-- processing pointer offset 0
+-- processing pointer offset 1
+---- copying object at relative address 10 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 10 to 1
+-- processing pointer offset 2
+-- processing pointer offset 3
+---- copying object at relative address 4 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 4 to 4
+-- processing pointer offset 4
+---- copying object at relative address 37 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 37 to 7
+gc: starting scan
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 16 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 16 to 10
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 13 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 13 to 13
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 22 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 22 to 16
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 19 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 19 to 19
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 25 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 25 to 22
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 7 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 7 to 25
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 28 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 28 to 28
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 37 with header [Forwarded]
+---- object forwarded to relative address 7
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 31 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 31 to 31
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 34 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 34 to 34
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+gc: swapping from and to spaces (36 words still live)
+_cflat_alloc: second attempt to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...triggering collection
+gc: processing stack frame 0 (from top of stack), with 5 pointers
+-- processing pointer offset 0
+-- processing pointer offset 1
+---- copying object at relative address 10 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 10 to 1
+-- processing pointer offset 2
+-- processing pointer offset 3
+---- copying object at relative address 4 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 4 to 4
+-- processing pointer offset 4
+---- copying object at relative address 37 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 37 to 7
+gc: starting scan
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 16 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 16 to 10
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 13 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 13 to 13
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 22 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 22 to 16
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 19 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 19 to 19
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 28 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 28 to 22
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 25 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 25 to 25
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 31 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 31 to 28
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 7 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 7 to 31
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 34 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 34 to 34
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 37 with header [Forwarded]
+---- object forwarded to relative address 7
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+gc: swapping from and to spaces (36 words still live)
+_cflat_alloc: second attempt to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...triggering collection
+gc: processing stack frame 0 (from top of stack), with 5 pointers
+-- processing pointer offset 0
+-- processing pointer offset 1
+---- copying object at relative address 10 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 10 to 1
+-- processing pointer offset 2
+-- processing pointer offset 3
+---- copying object at relative address 4 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 4 to 4
+-- processing pointer offset 4
+---- copying object at relative address 37 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 37 to 7
+gc: starting scan
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 16 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 16 to 10
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 13 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 13 to 13
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 22 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 22 to 16
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 19 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 19 to 19
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 28 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 28 to 22
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 25 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 25 to 25
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 34 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 34 to 28
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 31 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 31 to 31
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 7 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 7 to 34
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 37 with header [Forwarded]
+---- object forwarded to relative address 7
+-- incrementing scanning ptr by 3
+gc: swapping from and to spaces (36 words still live)
+_cflat_alloc: second attempt to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...triggering collection
+gc: processing stack frame 0 (from top of stack), with 5 pointers
+-- processing pointer offset 0
+-- processing pointer offset 1
+---- copying object at relative address 10 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 10 to 1
+-- processing pointer offset 2
+-- processing pointer offset 3
+---- copying object at relative address 4 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 4 to 4
+-- processing pointer offset 4
+---- copying object at relative address 37 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 37 to 7
+gc: starting scan
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 16 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 16 to 10
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 13 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 13 to 13
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 22 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 22 to 16
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 19 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 19 to 19
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 28 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 28 to 22
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 25 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 25 to 25
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 31 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 31 to 28
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 34 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 34 to 31
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 7 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 7 to 34
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 37 with header [Forwarded]
+---- object forwarded to relative address 7
+-- incrementing scanning ptr by 3
+gc: swapping from and to spaces (36 words still live)
+_cflat_alloc: second attempt to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...triggering collection
+gc: processing stack frame 0 (from top of stack), with 5 pointers
+-- processing pointer offset 0
+-- processing pointer offset 1
+---- copying object at relative address 10 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 10 to 1
+-- processing pointer offset 2
+-- processing pointer offset 3
+---- copying object at relative address 4 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 4 to 4
+-- processing pointer offset 4
+---- copying object at relative address 37 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 37 to 7
+gc: starting scan
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 16 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 16 to 10
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 13 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 13 to 13
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 22 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 22 to 16
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 19 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 19 to 19
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 25 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 25 to 22
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 28 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 28 to 25
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 31 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 31 to 28
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 34 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 34 to 31
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 7 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 7 to 34
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 37 with header [Forwarded]
+---- object forwarded to relative address 7
+-- incrementing scanning ptr by 3
+gc: swapping from and to spaces (36 words still live)
+_cflat_alloc: second attempt to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...triggering collection
+gc: processing stack frame 0 (from top of stack), with 5 pointers
+-- processing pointer offset 0
+-- processing pointer offset 1
+---- copying object at relative address 10 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 10 to 1
+-- processing pointer offset 2
+-- processing pointer offset 3
+---- copying object at relative address 4 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 4 to 4
+-- processing pointer offset 4
+---- copying object at relative address 37 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 37 to 7
+gc: starting scan
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 16 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 16 to 10
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 13 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 13 to 13
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 19 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 19 to 16
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 22 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 22 to 19
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 25 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 25 to 22
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 28 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 28 to 25
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 31 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 31 to 28
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 34 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 34 to 31
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 7 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 7 to 34
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 37 with header [Forwarded]
+---- object forwarded to relative address 7
+-- incrementing scanning ptr by 3
+gc: swapping from and to spaces (36 words still live)
+_cflat_alloc: second attempt to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...triggering collection
+gc: processing stack frame 0 (from top of stack), with 5 pointers
+-- processing pointer offset 0
+-- processing pointer offset 1
+---- copying object at relative address 10 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 10 to 1
+-- processing pointer offset 2
+-- processing pointer offset 3
+---- copying object at relative address 4 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 4 to 4
+-- processing pointer offset 4
+---- copying object at relative address 37 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 37 to 7
+gc: starting scan
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 13 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 13 to 10
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 16 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 16 to 13
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 19 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 19 to 16
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 22 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 22 to 19
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 25 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 25 to 22
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 28 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 28 to 25
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 31 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 31 to 28
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 34 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 34 to 31
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 7 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 7 to 34
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 37 with header [Forwarded]
+---- object forwarded to relative address 7
+-- incrementing scanning ptr by 3
+gc: swapping from and to spaces (36 words still live)
+_cflat_alloc: second attempt to allocate 3 words...successful
+_cflat_alloc: attempting to allocate 3 words...triggering collection
+gc: processing stack frame 0 (from top of stack), with 5 pointers
+-- processing pointer offset 0
+-- processing pointer offset 1
+-- processing pointer offset 2
+-- processing pointer offset 3
+---- copying object at relative address 4 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 4 to 1
+-- processing pointer offset 4
+---- copying object at relative address 37 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 37 to 4
+gc: starting scan
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 10 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 10 to 7
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 13 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 13 to 10
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 16 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 16 to 13
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 19 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 19 to 16
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 22 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 22 to 19
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 25 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 25 to 22
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 28 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 28 to 25
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 31 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 31 to 28
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 34 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 34 to 31
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 7 with header [Struct, size = 2, ptr offsets = 1]
+---- moving object from relative address 7 to 34
+-- incrementing scanning ptr by 3
+-- scanning header [Struct, size = 2, ptr offsets = 1]
+---- copying object at relative address 37 with header [Forwarded]
+---- object forwarded to relative address 4
+-- incrementing scanning ptr by 3
+gc: swapping from and to spaces (36 words still live)
+_cflat_alloc: second attempt to allocate 3 words...successful
