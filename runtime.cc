@@ -66,6 +66,11 @@ std::string get_env(const std::string& env_name) {
   return val ? val : "";
 }
 
+// forward decl for the garbage collector function
+static void gc_collect(uintptr_t *top_frame_ptr);
+
+// set base_frame_ptr, reads env vars, validates heap size, mallocs heap space
+// initializes from_space, to_space, and bump_ptr
 extern "C" void _cflat_init_gc() {
   assert(!from_space && !to_space && !bump_ptr && !base_frame_ptr &&
     "_cflat_init_gc should be called exactly once, at the beginning of main");
@@ -104,20 +109,103 @@ extern "C" void _cflat_init_gc() {
   if (gc_log) { std::cout << "_cflat_init_gc: allocated heap of " << heap_size << " words" << std::endl; }
 }
 
+// Check if bump_ptr + num_words fits within the current from-space half
+// If yes: bump, zero, return.
+// If no: trigger GC
+//    check if fits: then bump, zero, return.
+//    if not: log “out of memory” and call _cflat_panic.
 extern "C" void* _cflat_alloc(size_t num_words) {
   assert(from_space && to_space && bump_ptr && base_frame_ptr &&
     "_cflat_alloc should only be called after _cflat_init_gc");
+
+  // Current semispace boundaries
+  uintptr_t *from_start = from_space;
+  uintptr_t *from_end   = from_space + heap_size / 2;
   
-    // FILL ME IN
-    //
-    // note: to get a pointer to the base of the topmost stack frame (i.e., the
-    // stack frame of the function that triggered GC), use
-    // `(uintptr_t*)__builtin_frame_address(1)`. this _must_ be called from
-    // _cflat_alloc, _not_ from a function called by _cflat_alloc.
+  auto has_space = [&](size_t n) {
+    return bump_ptr + n <= from_end;
+  };
+
+  // First attempt: try to allocate without collecting
+  if (gc_log) {
+    std::cout << "_cflat_alloc: attempting to allocate "
+              << num_words << " words...";
+  }
+
+  // successful allocation without GC
+  if (has_space(num_words)) {
+    if (gc_log) std::cout << "successful" << std::endl;
+
+    uintptr_t *result = bump_ptr;
+    bump_ptr += num_words; // bump allocation pointer
+    _cflat_zero_words(result, num_words); // zero out allocated space
+    return (void*)result;
+  }
+
+  // need to trigger GC
+  if (gc_log) {
+    std::cout << "triggering collection" << std::endl;
+  }
+
+  // Get the topmost frame pointer: the caller of _cflat_alloc
+  uintptr_t *top_frame_ptr = (uintptr_t*)__builtin_frame_address(1);
+  gc_collect(top_frame_ptr);
+  
+  // After GC, try to allocate again
+  // Recompute boundaries in case from_space changed
+  from_start = from_space;
+  from_end   = from_space + heap_size / 2;
+  
+  // Second attempt: try again after GC
+  if (gc_log) {
+    std::cout << "_cflat_alloc: second attempt to allocate "
+              << num_words << " words...";
+  }
+
+  // successful allocation after GC
+  if (has_space(num_words)) {
+    if (gc_log) std::cout << "successful" << std::endl;
+
+    uintptr_t *result = bump_ptr;
+    bump_ptr += num_words; // bump allocation pointer
+    _cflat_zero_words(result, num_words); // zero out allocated space
+    return (void*)result;
+  }
+
+  // out of memory
+  if (gc_log) {
+    std::cout << "out of memory" << std::endl;
+  }
+  _cflat_panic("out of memory");
+  return nullptr; // unreachable
 }
+
+
 
 //
 // the garbage collector implementation.
 //
 
-// FILL ME IN
+// Forward decls for helpers
+static bool in_from_space(uintptr_t *p);
+static uintptr_t* copy_or_forward(uintptr_t **slot,
+                                  uintptr_t *&new_bump);
+static void scan_copied_objects(uintptr_t *scan_ptr,
+                                uintptr_t *&new_bump);
+
+static bool in_from_space(uintptr_t *p) {
+  uintptr_t *from_start = from_space;
+  uintptr_t *from_end   = from_space + heap_size / 2;
+  return p >= from_start && p < from_end;
+}
+
+// Main GC entry point
+static void gc_collect(uintptr_t *top_frame_ptr) {
+  // Initialize to-space bump and scan pointers
+  uintptr_t *to_start = to_space;
+  uintptr_t *scan_ptr = to_start;
+  uintptr_t *new_bump = to_start;
+
+  // Scan stack frames from top_frame_ptr down to base_frame_ptr
+
+}
