@@ -119,7 +119,6 @@ extern "C" void* _cflat_alloc(size_t num_words) {
     "_cflat_alloc should only be called after _cflat_init_gc");
 
   // Current semispace boundaries
-  uintptr_t *from_start = from_space;
   uintptr_t *from_end   = from_space + heap_size / 2;
   
   auto has_space = [&](size_t n) {
@@ -185,7 +184,7 @@ extern "C" void* _cflat_alloc(size_t num_words) {
 // the garbage collector implementation.
 //
 
-static const uintptr_t TAG_ATOMIC = 2; // [Array/Struct, ptrs = false]
+// static const uintptr_t TAG_ATOMIC = 2; // [Array/Struct, ptrs = false]
 static const uintptr_t TAG_PTRS   = 3; // [Array/Struct, ptrs = true] (Assumption for future TS)
 
 // Log helper to match formatted output
