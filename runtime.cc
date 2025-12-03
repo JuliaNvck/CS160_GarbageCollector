@@ -153,7 +153,6 @@ extern "C" void* _cflat_alloc(size_t num_words) {
   
   // After GC, try to allocate again
   // Recompute boundaries in case from_space changed
-  from_start = from_space;
   from_end   = from_space + heap_size / 2;
   
   // Second attempt: try again after GC
@@ -186,26 +185,178 @@ extern "C" void* _cflat_alloc(size_t num_words) {
 // the garbage collector implementation.
 //
 
-// Forward decls for helpers
-static bool in_from_space(uintptr_t *p);
-static uintptr_t* copy_or_forward(uintptr_t **slot,
-                                  uintptr_t *&new_bump);
-static void scan_copied_objects(uintptr_t *scan_ptr,
-                                uintptr_t *&new_bump);
+static const uintptr_t TAG_ATOMIC = 2; // [Array/Struct, ptrs = false]
+static const uintptr_t TAG_PTRS   = 3; // [Array/Struct, ptrs = true] (Assumption for future TS)
 
-static bool in_from_space(uintptr_t *p) {
-  uintptr_t *from_start = from_space;
-  uintptr_t *from_end   = from_space + heap_size / 2;
-  return p >= from_start && p < from_end;
+// Log helper to match formatted output
+// e.g. [Array, len = 1, ptrs = false]
+static void print_header_log(uintptr_t header) {
+    long len = header >> 3;
+    long tag = header & 0x7;
+    std::cout << "[Array, len = " << len << ", ptrs = " 
+              << (tag == TAG_PTRS ? "true" : "false") << "]";
+}
+
+// Process a pointer (forward or copy)
+// slot_ptr: address of the pointer variable (root or field in heap object)
+// free_ptr: reference to the current allocation pointer in to_space
+static void process_transitive(uintptr_t* slot_ptr, uintptr_t*& free_ptr) {
+  uintptr_t obj_addr = *slot_ptr;
+  // 1. Filter: Check if pointer is NULL or outside from_space
+  if (obj_addr == 0) return;
+  // Calculate boundaries of the space we are removing from
+  uintptr_t* old_start = from_space;
+  uintptr_t* old_end   = from_space + heap_size / 2;
+  // If it's not in the old heap, we don't move it
+  if (obj_addr < (uintptr_t)old_start || obj_addr >= (uintptr_t)old_end) {
+      return;
+  }
+
+  uintptr_t* obj_ptr = (uintptr_t*)obj_addr;
+  uintptr_t* header_ptr = obj_ptr - 1; // header was written 8 bytes before the data pointer
+  uintptr_t header = *header_ptr;
+
+  uintptr_t* new_start = to_space;
+  uintptr_t* new_end   = to_space + heap_size / 2;
+  // If the header is a pointer into the new space, it's forwarded
+  // If the object was already moved, the header now contains the address of the copy: value will fall inside the to_space range
+  if (header >= (uintptr_t)new_start && header < (uintptr_t)new_end) {
+    // Update the slot (current root) to point to point to the address found in the header
+    *slot_ptr = header;
+    return;
+  }
+
+  // 2. Not forwarded yet: copy the object to to_space
+  long len = header >> 3; // Upper 61 bits: The Length (number of elements/words)
+  long total_words = len + 1; // header + data
+  
+  // Relative address of the data in old space
+  long old_rel = (uintptr_t)obj_ptr - (uintptr_t)old_start;
+  // Relative address of the data in new space (free_ptr points to new header, so data is +1)
+  long new_rel = ((uintptr_t)free_ptr + WORDSIZE) - (uintptr_t)new_start;
+
+  // Copy the whole block (header + data)
+  // free_ptr points to the destination address for the Header
+  uintptr_t* dest_header_ptr = free_ptr;
+  uintptr_t* dest_obj_ptr    = free_ptr + 1; // The new pointer value
+
+  // Total size = 1 (header) + len (payload).
+  size_t copy_size_words = 1 + len;
+
+  if (gc_log) {
+    long rel_addr_from = ((uintptr_t)obj_ptr - (uintptr_t)from_space) / WORDSIZE;
+    std::cout << "---- copying object at relative address " << rel_addr_from 
+              << " with header ";
+    print_header_log(header);
+    std::cout << std::endl;
+    
+    long rel_addr_to = ((uintptr_t)dest_obj_ptr - (uintptr_t)to_space) / WORDSIZE;
+    std::cout << "---- moving object from relative address " << rel_addr_from 
+              << " to " << rel_addr_to << std::endl;
+  }
+  // Perform copy
+  std::memcpy(dest_header_ptr, header_ptr, copy_size_words * WORDSIZE);
+
+  // Leaving a trail for future references and updating the current reference:
+  // 4. Install Forwarding Address
+  // Overwrite old header with the memory address of the new copy in ToSpace (pointer to data, not header)
+  // If another variable also points to this old object in FromSpace, it can find the new location
+  // knows to just update it to this address rather than copying the object again
+  *header_ptr = (uintptr_t)dest_obj_ptr;
+  
+  // 5. Update Root to point to correct new location
+  *slot_ptr = (uintptr_t)dest_obj_ptr;
+
+  // 6. Bump Free Pointer
+  free_ptr += copy_size_words;
+
 }
 
 // Main GC entry point
-static void gc_collect(uintptr_t *top_frame_ptr) {
-  // Initialize to-space bump and scan pointers
-  uintptr_t *to_start = to_space;
-  uintptr_t *scan_ptr = to_start;
-  uintptr_t *new_bump = to_start;
+static void gc_collect(uintptr_t* top_frame) {
+  // Current allocation pointer in the to-space
+  uintptr_t* free_ptr = to_space;
+  // Scan pointer in the to-space
+  uintptr_t* scan_ptr = to_space;
 
-  // Scan stack frames from top_frame_ptr down to base_frame_ptr
+  // 1. Stack Scanning (Roots)
+  uintptr_t* frame = top_frame;
+  int frame_idx = 0;
+  // Walk up the stack until we hit the base frame (main)
+  // We traverse until frame > base_frame_ptr
+
+  while (frame <= base_frame_ptr) {
+    // gc_root_count (num pointer vars in curr stack frame) is stored at -8(%rbp) --> first word of the frame
+    // frame pointer points to old %rbp
+    int64_t gc_root_count = *((int64_t*)(frame - 1));
+    if (gc_log) {
+            std::cout << "gc: processing stack frame " << frame_idx 
+                      << " (from top of stack), with " << gc_root_count << " pointers" << std::endl;
+        }
+    // Roots are stored below the GC header
+    // GC header is at -1 word
+    // First root (index 0) is at -2 words (-16 bytes) -- > root i is at frame - 2 - i
+    for (size_t i = 0; i < gc_root_count; ++i) {
+      if (gc_log) {
+          std::cout << "-- processing pointer offset " << i << std::endl;
+      }
+      uintptr_t* root_slot = frame - 2 - i;
+      process_transitive(root_slot, free_ptr);
+    }
+
+    // Move to next frame (stored at 0(%rbp))
+    if (frame == base_frame_ptr) break; // if loop reaches base_frame_ptr, it has finished scanning main
+    frame = (uintptr_t*)*frame; // next frame pointer: retrieves the address of the caller's frame
+    frame_idx++;
+  }
+
+  // 2. Scan (Trace)
+  if (gc_log) {
+      std::cout << "gc: starting scan" << std::endl;
+  }
+  // scan_ptr points to the start of the Header of the object to scan
+  // free_ptr points to the next free word
+
+  while (scan_ptr < free_ptr) {
+    uintptr_t header = *scan_ptr;
+    long len = header >> 3; // Upper 61 bits: The Length (number of elements/words)
+    long tag = header & 0x7; // Lower 3 bits: The Tag (type information, e.g., is it a pointer array?)
+
+    if (gc_log) {
+      std::cout << "-- scanning header ";
+      print_header_log(header);
+      std::cout << std::endl;
+    }
+    // Process each field in the object (scan_ptr + 1)
+    uintptr_t* fields = scan_ptr + 1;
+
+    // If this object contains pointers (Structs/Arrays of Pointers), scan them.
+    if (tag == TAG_PTRS) {
+        for (int i = 0; i < len; ++i) {
+            process_transitive(&fields[i], free_ptr);
+        }
+    }
+    // Advance scan_ptr to the next object header
+    // Current object size = 1 (header) + len (data)
+    size_t size = 1 + len;
+    if (gc_log) {
+      std::cout << "-- incrementing scanning ptr by " << size << std::endl;
+    }
+    scan_ptr += size;
+  }
+
+
+  // 3. Cleanup and Swap
+  // Calculate live size for log
+  size_t live_words = free_ptr - to_space;
+  if (gc_log) {
+    std::cout << "gc: swapping from and to spaces (" << live_words 
+              << " words still live)" << std::endl;
+  }
+
+  // Swap spaces
+  std::swap(from_space, to_space);
+  // Reset bump_ptr to the end of the data just copied (now in from_space)
+  bump_ptr = from_space + live_words;
 
 }
