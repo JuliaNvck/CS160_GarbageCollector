@@ -199,14 +199,23 @@ static bool is_forwarding_pointer(uintptr_t header) {
 static size_t get_payload_words(uintptr_t header) {
     long len = header >> 3;  // Upper 61 bits: length
     long tag = header & 0x7;  // Lower 3 bits: Tag
-    // Structs use 2-word chunks for the length field
-    if (tag == TAG_STRUCT_ATOMIC || tag == TAG_STRUCT_PTRS) {
-        // Theory: size is in upper bits of len
-        // ptr bitmap is in lower bits of len
-        return len >> 5;  // Extract size from bits 8+ of header (bits 5+ of len)
+    
+    // Tag 0 is used for ALL structs (both atomic and with pointers)
+    if (tag == TAG_STRUCT_PTRS) {
+        long size = len >> 5;
+        long ptr_offsets = len & 0x1F;
+        
+        // If size from upper bits is 0, this is an atomic struct
+        // For atomic structs: len directly encodes size in chunks
+        // len=1 → size=2, so size = len * 2
+        if (size == 0) {
+            return len * 2;
+        }
+        return size;
     }
     
-    // For arrays, len is the count
+    // For TAG_STRUCT_ATOMIC (tag=1): len directly encodes the size
+    // For arrays: len is the array length
     return len;
 }
 
@@ -219,23 +228,24 @@ static void print_header_log(uintptr_t header) {
     if (tag == TAG_ARRAY_ATOMIC || tag == TAG_ARRAY_PTRS) {
         std::cout << "[Array, len = " << len << ", ptrs = " 
                   << ((tag == TAG_ARRAY_PTRS) ? "true" : "false") << "]";
-    } else {
-        // Structs: TAG_STRUCT_ATOMIC or TAG_STRUCT_PTRS
-        // len encodes both size and pointer info
-        // size is in upper bits: len >> 5
-        // ptr offsets are in lower 5 bits: len & 0x1F
+    } else if (tag == TAG_STRUCT_PTRS) {
+        // Tag 0 is used for ALL structs
         long size = len >> 5;
         long ptr_info = len & 0x1F;
         
-        std::cout << "[Struct, size = " << size << ", ptr offsets = ";
-        if (tag == TAG_STRUCT_ATOMIC) {
-            std::cout << "none]";
+        if (size == 0) {
+            // Atomic struct: len directly encodes size in 2-word chunks
+            // len=1 → size=2
+            long actual_size = len * 2;
+            std::cout << "[Struct, size = " << actual_size << ", ptr offsets = none]";
+        } else if (ptr_info == 0) {
+            std::cout << "[Struct, size = " << size << ", ptr offsets = none]";
         } else {
-            // TAG_STRUCT_PTRS: ptr_info is a bitmap of which offsets have pointers
-            // For now, just print the bitmap value
-            // TODO: decode bitmap and print actual offsets
-            std::cout << ptr_info << "]";
+            std::cout << "[Struct, size = " << size << ", ptr offsets = " << ptr_info << "]";
         }
+    } else {
+        // TAG_STRUCT_ATOMIC (tag=1): len directly encodes size
+        std::cout << "[Struct, size = " << len << ", ptr offsets = none]";
     }
 }
 
@@ -382,12 +392,23 @@ static void gc_collect(uintptr_t* top_frame) {
     // Process each field in the object (scan_ptr + 1)
     uintptr_t* fields = scan_ptr + 1;
 
-    // If this object contains pointers (Structs/Arrays of Pointers), scan them.
-    if (tag == TAG_STRUCT_PTRS || tag == TAG_ARRAY_PTRS) {
-        // Note: For structs, payload_words is the number of 8-byte words.
-        // Pointers are 8 bytes. So iterating up to payload_words is correct.
+    // If this object contains pointers, scan them
+    if (tag == TAG_ARRAY_PTRS) {
+        // Arrays with pointers: all elements are pointers
         for (size_t i = 0; i < payload_words; ++i) {
             process_transitive(&fields[i], free_ptr);
+        }
+    } else if (tag == TAG_STRUCT_PTRS) {
+        // Structs: need to check if they actually have pointers
+        long len = header >> 3;
+        long ptr_offsets = len & 0x1F;
+        
+        // Only process if ptr_offsets > 0 (struct has pointers)
+        if (ptr_offsets > 0) {
+            // For now, process all fields (TODO: decode bitmap to process only pointer fields)
+            for (size_t i = 0; i < payload_words; ++i) {
+                process_transitive(&fields[i], free_ptr);
+            }
         }
     }
     // Advance scan_ptr to the next object header
