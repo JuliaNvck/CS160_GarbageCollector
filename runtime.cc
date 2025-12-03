@@ -182,16 +182,45 @@ extern "C" void* _cflat_alloc(size_t num_words) {
 // the garbage collector implementation.
 //
 
+static const uintptr_t TAG_STRUCT_ATOMIC = 0;
+static const uintptr_t TAG_STRUCT_PTRS   = 1;
+static const uintptr_t TAG_ARRAY_ATOMIC  = 2;
+static const uintptr_t TAG_ARRAY_PTRS    = 3;
+
 // static const uintptr_t TAG_ATOMIC = 2; // [Array/Struct, ptrs = false]
 static const uintptr_t TAG_PTRS   = 3; // [Array/Struct, ptrs = true] (Assumption for future TS)
+
+static size_t get_payload_words(uintptr_t header) {
+    long len = header >> 3;
+    long tag = header & 0x7;
+    // Structs use 2-word chunks for the length field
+    if (tag == TAG_STRUCT_ATOMIC || tag == TAG_STRUCT_PTRS) {
+        return len * 2; 
+    }
+    // Arrays use standard word count
+    return len;
+}
 
 // Log helper to match formatted output
 // e.g. [Array, len = 1, ptrs = false]
 static void print_header_log(uintptr_t header) {
     long len = header >> 3;
     long tag = header & 0x7;
-    std::cout << "[Array, len = " << len << ", ptrs = " 
-              << (tag == TAG_PTRS ? "true" : "false") << "]";
+    
+    if (tag == TAG_ARRAY_ATOMIC || tag == TAG_ARRAY_PTRS) {
+        std::cout << "[Array, len = " << len << ", ptrs = " 
+                  << ((tag == TAG_ARRAY_PTRS) ? "true" : "false") << "]";
+    } else {
+        // Structs
+        size_t size = len * 2;
+        std::cout << "[Struct, size = " << size << ", ptr offsets = ";
+        if (tag == TAG_STRUCT_ATOMIC) {
+            std::cout << "none]";
+        } else {
+            // For now, simple print (TS1/2 usually only deal with atomic structs)
+            std::cout << "mixed]"; 
+        }
+    }
 }
 
 // Process a pointer (forward or copy)
@@ -220,17 +249,38 @@ static void process_transitive(uintptr_t* slot_ptr, uintptr_t*& free_ptr) {
   if (header >= (uintptr_t)new_start && header < (uintptr_t)new_end) {
     // Update the slot (current root) to point to point to the address found in the header
     *slot_ptr = header;
+
+    if (gc_log) {
+        long old_rel = ((uintptr_t)obj_ptr - (uintptr_t)from_space) / WORDSIZE;
+        // The forwarded address (header) points to the new data location
+        uintptr_t* forwarded_addr = (uintptr_t*)header;
+        long new_rel = ((uintptr_t)forwarded_addr - (uintptr_t)to_space) / WORDSIZE;
+
+        std::cout << "---- copying object at relative address " << old_rel 
+                  << " with header [Forwarded]" << std::endl;
+        std::cout << "---- object forwarded to relative address " << new_rel << std::endl;
+    }
+
     return;
   }
 
+  size_t payload_words = get_payload_words(header);
+
+  if (gc_log) {
+    long rel_addr_from = ((uintptr_t)obj_ptr - (uintptr_t)from_space) / WORDSIZE;
+    uintptr_t* dest_obj_ptr = free_ptr + 1;
+    long rel_addr_to = ((uintptr_t)dest_obj_ptr - (uintptr_t)to_space) / WORDSIZE;
+
+    std::cout << "---- copying object at relative address " << rel_addr_from 
+              << " with header ";
+    print_header_log(header);
+    std::cout << std::endl;
+    
+    std::cout << "---- moving object from relative address " << rel_addr_from 
+              << " to " << rel_addr_to << std::endl;
+  }
+
   // 2. Not forwarded yet: copy the object to to_space
-  long len = header >> 3; // Upper 61 bits: The Length (number of elements/words)
-  long total_words = len + 1; // header + data
-  
-  // Relative address of the data in old space
-  long old_rel = (uintptr_t)obj_ptr - (uintptr_t)old_start;
-  // Relative address of the data in new space (free_ptr points to new header, so data is +1)
-  long new_rel = ((uintptr_t)free_ptr + WORDSIZE) - (uintptr_t)new_start;
 
   // Copy the whole block (header + data)
   // free_ptr points to the destination address for the Header
@@ -238,19 +288,8 @@ static void process_transitive(uintptr_t* slot_ptr, uintptr_t*& free_ptr) {
   uintptr_t* dest_obj_ptr    = free_ptr + 1; // The new pointer value
 
   // Total size = 1 (header) + len (payload).
-  size_t copy_size_words = 1 + len;
+  size_t copy_size_words = 1 + payload_words;
 
-  if (gc_log) {
-    long rel_addr_from = ((uintptr_t)obj_ptr - (uintptr_t)from_space) / WORDSIZE;
-    std::cout << "---- copying object at relative address " << rel_addr_from 
-              << " with header ";
-    print_header_log(header);
-    std::cout << std::endl;
-    
-    long rel_addr_to = ((uintptr_t)dest_obj_ptr - (uintptr_t)to_space) / WORDSIZE;
-    std::cout << "---- moving object from relative address " << rel_addr_from 
-              << " to " << rel_addr_to << std::endl;
-  }
   // Perform copy
   std::memcpy(dest_header_ptr, header_ptr, copy_size_words * WORDSIZE);
 
@@ -316,7 +355,7 @@ static void gc_collect(uintptr_t* top_frame) {
 
   while (scan_ptr < free_ptr) {
     uintptr_t header = *scan_ptr;
-    long len = header >> 3; // Upper 61 bits: The Length (number of elements/words)
+    size_t payload_words = get_payload_words(header);
     long tag = header & 0x7; // Lower 3 bits: The Tag (type information, e.g., is it a pointer array?)
 
     if (gc_log) {
@@ -328,14 +367,16 @@ static void gc_collect(uintptr_t* top_frame) {
     uintptr_t* fields = scan_ptr + 1;
 
     // If this object contains pointers (Structs/Arrays of Pointers), scan them.
-    if (tag == TAG_PTRS) {
-        for (int i = 0; i < len; ++i) {
+    if (tag == TAG_STRUCT_PTRS || tag == TAG_ARRAY_PTRS) {
+        // Note: For structs, payload_words is the number of 8-byte words.
+        // Pointers are 8 bytes. So iterating up to payload_words is correct.
+        for (size_t i = 0; i < payload_words; ++i) {
             process_transitive(&fields[i], free_ptr);
         }
     }
     // Advance scan_ptr to the next object header
     // Current object size = 1 (header) + len (data)
-    size_t size = 1 + len;
+    size_t size = 1 + payload_words;
     if (gc_log) {
       std::cout << "-- incrementing scanning ptr by " << size << std::endl;
     }
