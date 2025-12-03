@@ -172,9 +172,6 @@ extern "C" void* _cflat_alloc(size_t num_words) {
   }
 
   // out of memory
-  if (gc_log) {
-    std::cout << "out of memory" << std::endl;
-  }
   _cflat_panic("out of memory");
   return nullptr; // unreachable
 }
