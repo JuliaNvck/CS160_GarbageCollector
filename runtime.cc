@@ -182,22 +182,31 @@ extern "C" void* _cflat_alloc(size_t num_words) {
 // the garbage collector implementation.
 //
 
-static const uintptr_t TAG_STRUCT_ATOMIC = 0;
-static const uintptr_t TAG_STRUCT_PTRS   = 1;
+// NOTE: Tag values based on actual compiler behavior
+static const uintptr_t TAG_STRUCT_PTRS   = 0; 
+static const uintptr_t TAG_STRUCT_ATOMIC = 1;
 static const uintptr_t TAG_ARRAY_ATOMIC  = 2;
 static const uintptr_t TAG_ARRAY_PTRS    = 3;
 
-// static const uintptr_t TAG_ATOMIC = 2; // [Array/Struct, ptrs = false]
-static const uintptr_t TAG_PTRS   = 3; // [Array/Struct, ptrs = true] (Assumption for future TS)
+// Helper to check if a header value looks like a pointer (forwarding address)
+// Forwarding addresses are actual memory addresses in to-space
+static bool is_forwarding_pointer(uintptr_t header) {
+    uintptr_t* new_start = to_space;
+    uintptr_t* new_end   = to_space + heap_size / 2;
+    return (header >= (uintptr_t)new_start && header < (uintptr_t)new_end);
+}
 
 static size_t get_payload_words(uintptr_t header) {
-    long len = header >> 3;
-    long tag = header & 0x7;
+    long len = header >> 3;  // Upper 61 bits: length
+    long tag = header & 0x7;  // Lower 3 bits: Tag
     // Structs use 2-word chunks for the length field
     if (tag == TAG_STRUCT_ATOMIC || tag == TAG_STRUCT_PTRS) {
-        return len * 2; 
+        // Theory: size is in upper bits of len
+        // ptr bitmap is in lower bits of len
+        return len >> 5;  // Extract size from bits 8+ of header (bits 5+ of len)
     }
-    // Arrays use standard word count
+    
+    // For arrays, len is the count
     return len;
 }
 
@@ -211,14 +220,21 @@ static void print_header_log(uintptr_t header) {
         std::cout << "[Array, len = " << len << ", ptrs = " 
                   << ((tag == TAG_ARRAY_PTRS) ? "true" : "false") << "]";
     } else {
-        // Structs
-        size_t size = len * 2;
+        // Structs: TAG_STRUCT_ATOMIC or TAG_STRUCT_PTRS
+        // len encodes both size and pointer info
+        // size is in upper bits: len >> 5
+        // ptr offsets are in lower 5 bits: len & 0x1F
+        long size = len >> 5;
+        long ptr_info = len & 0x1F;
+        
         std::cout << "[Struct, size = " << size << ", ptr offsets = ";
         if (tag == TAG_STRUCT_ATOMIC) {
             std::cout << "none]";
         } else {
-            // For now, simple print (TS1/2 usually only deal with atomic structs)
-            std::cout << "mixed]"; 
+            // TAG_STRUCT_PTRS: ptr_info is a bitmap of which offsets have pointers
+            // For now, just print the bitmap value
+            // TODO: decode bitmap and print actual offsets
+            std::cout << ptr_info << "]";
         }
     }
 }
