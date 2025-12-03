@@ -7,6 +7,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <cstdint>
 
 //
 // standard functions that can be called as `extern` from cflat programs.
@@ -282,9 +283,9 @@ static void gc_collect(uintptr_t* top_frame) {
   uintptr_t* frame = top_frame;
   int frame_idx = 0;
   // Walk up the stack until we hit the base frame (main)
-  // We traverse until frame > base_frame_ptr
+  // We traverse until frame >= base_frame_ptr (stop BEFORE the C runtime frame)
 
-  while (frame <= base_frame_ptr) {
+  while (frame < base_frame_ptr) {
     // gc_root_count (num pointer vars in curr stack frame) is stored at -8(%rbp) --> first word of the frame
     // frame pointer points to old %rbp
     int64_t gc_root_count = *((int64_t*)(frame - 1));
