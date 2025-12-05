@@ -183,10 +183,10 @@ extern "C" void* _cflat_alloc(size_t num_words) {
 //
 
 // NOTE: Tag values based on actual compiler behavior
-static const uintptr_t TAG_STRUCT_PTRS   = 0; 
-static const uintptr_t TAG_STRUCT_ATOMIC = 1;
+static const uintptr_t TAG_STRUCT_ATOMIC = 0;
+static const uintptr_t TAG_STRUCT_PTRS   = 4; 
 static const uintptr_t TAG_ARRAY_ATOMIC  = 2;
-static const uintptr_t TAG_ARRAY_PTRS    = 3;
+static const uintptr_t TAG_ARRAY_PTRS    = 6;
 
 // Helper to check if a header value looks like a pointer (forwarding address)
 // Forwarding addresses are actual memory addresses in to-space
@@ -200,21 +200,26 @@ static size_t get_payload_words(uintptr_t header) {
     long len = header >> 3;  // Upper 61 bits: length
     long tag = header & 0x7;  // Lower 3 bits: Tag
     
-    // Tag 0 is used for ALL structs (both atomic and with pointers)
+    // Tag 4 is used for structs with pointers (TS4 encoding)
     if (tag == TAG_STRUCT_PTRS) {
         long size = len >> 5;
         long ptr_offsets = len & 0x1F;
-        
-        // If size from upper bits is 0, this is an atomic struct
-        // For atomic structs: len directly encodes size in chunks
-        // len=1 → size=2, so size = len * 2
-        if (size == 0) {
-            return len * 2;
-        }
         return size;
     }
     
-    // For TAG_STRUCT_ATOMIC (tag=1): len directly encodes the size
+    // Tag 0 can be either atomic struct OR struct with pointers (TS3 encoding)
+    if (tag == TAG_STRUCT_ATOMIC) {
+        // Check if upper bits encode a size (struct with pointers)
+        long size = len >> 5;
+        if (size > 0) {
+            // This is a struct with pointers using TS3 encoding
+            return size;
+        }
+        // This is an atomic struct: len encodes size in 2-word chunks
+        // len=1 → size=2
+        return len * 2;
+    }
+    
     // For arrays: len is the array length
     return len;
 }
@@ -229,23 +234,47 @@ static void print_header_log(uintptr_t header) {
         std::cout << "[Array, len = " << len << ", ptrs = " 
                   << ((tag == TAG_ARRAY_PTRS) ? "true" : "false") << "]";
     } else if (tag == TAG_STRUCT_PTRS) {
-        // Tag 0 is used for ALL structs
+        // Tag 4 is used for structs with pointers (TS4 encoding)
         long size = len >> 5;
-        long ptr_info = len & 0x1F;
+        long ptr_bitmap = len & 0x1F;
         
-        if (size == 0) {
-            // Atomic struct: len directly encodes size in 2-word chunks
-            // len=1 → size=2
-            long actual_size = len * 2;
-            std::cout << "[Struct, size = " << actual_size << ", ptr offsets = none]";
-        } else if (ptr_info == 0) {
+        if (ptr_bitmap == 0) {
             std::cout << "[Struct, size = " << size << ", ptr offsets = none]";
         } else {
-            std::cout << "[Struct, size = " << size << ", ptr offsets = " << ptr_info << "]";
+            // TS4: bitmap value N means first N+1 fields are pointers
+            std::cout << "[Struct, size = " << size << ", ptr offsets =";
+            size_t num_ptr_fields = ptr_bitmap + 1;
+            for (size_t i = 0; i < num_ptr_fields && i < 5; ++i) {
+                std::cout << " " << i;
+            }
+            std::cout << "]";
+        }
+    } else if (tag == TAG_STRUCT_ATOMIC) {
+        // Tag 0: could be atomic struct OR struct with pointers (TS3 encoding)
+        long size = len >> 5;
+        long ptr_bitmap = len & 0x1F;
+        
+        if (size > 0) {
+            // This is a struct with pointers using TS3 encoding (bitmap is actual bitmap)
+            if (ptr_bitmap == 0) {
+                std::cout << "[Struct, size = " << size << ", ptr offsets = none]";
+            } else {
+                // TS3: bitmap seems to be shifted - bit 0 represents offset 1, bit 1 represents offset 2, etc.
+                std::cout << "[Struct, size = " << size << ", ptr offsets =";
+                for (int i = 0; i < 5; ++i) {
+                    if (ptr_bitmap & (1 << i)) {
+                        std::cout << " " << (i + 1);  // Print i+1, not i
+                    }
+                }
+                std::cout << "]";
+            }
+        } else {
+            // Atomic struct: len encodes size in 2-word chunks
+            std::cout << "[Struct, size = " << (len * 2) << ", ptr offsets = none]";
         }
     } else {
-        // TAG_STRUCT_ATOMIC (tag=1): len directly encodes size
-        std::cout << "[Struct, size = " << len << ", ptr offsets = none]";
+        // Unknown tag
+        std::cout << "[Unknown tag " << tag << ", len = " << len << "]";
     }
 }
 
@@ -399,15 +428,29 @@ static void gc_collect(uintptr_t* top_frame) {
             process_transitive(&fields[i], free_ptr);
         }
     } else if (tag == TAG_STRUCT_PTRS) {
-        // Structs: need to check if they actually have pointers
+        // TS4: bitmap value N means first N+1 fields are pointers
         long len = header >> 3;
-        long ptr_offsets = len & 0x1F;
+        long ptr_bitmap = len & 0x1F;
         
-        // Only process if ptr_offsets > 0 (struct has pointers)
-        if (ptr_offsets > 0) {
-            // For now, process all fields (TODO: decode bitmap to process only pointer fields)
-            for (size_t i = 0; i < payload_words; ++i) {
+        if (ptr_bitmap > 0) {
+            size_t num_ptr_fields = ptr_bitmap + 1;
+            for (size_t i = 0; i < num_ptr_fields && i < payload_words; ++i) {
                 process_transitive(&fields[i], free_ptr);
+            }
+        }
+    } else if (tag == TAG_STRUCT_ATOMIC) {
+        // Tag 0: check if it's actually a struct with pointers (TS3 encoding)
+        long len = header >> 3;
+        long size = len >> 5;
+        long ptr_bitmap = len & 0x1F;
+        
+        if (size > 0 && ptr_bitmap > 0) {
+            // TS3: bitmap is shifted - bit 0 represents offset 1, bit 1 represents offset 2, etc.
+            for (size_t i = 0; i < payload_words && i < 5; ++i) {
+                // Check bit i for offset i+1
+                if (i < payload_words - 1 && (ptr_bitmap & (1 << i))) {
+                    process_transitive(&fields[i + 1], free_ptr);
+                }
             }
         }
     }
