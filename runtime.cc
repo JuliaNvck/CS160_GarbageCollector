@@ -209,15 +209,25 @@ static size_t get_payload_words(uintptr_t header) {
     
     // Tag 0 can be either atomic struct OR struct with pointers (TS3 encoding)
     if (tag == TAG_STRUCT_ATOMIC) {
-        // Check if upper bits encode a size (struct with pointers)
+        // First check if upper bits encode a size (struct with pointers - TS3)
+        // TS3 encoding: len = (size << 5) | bitmap, where size is in upper bits
         long size = len >> 5;
         if (size > 0) {
             // This is a struct with pointers using TS3 encoding
             return size;
         }
-        // This is an atomic struct: len encodes size in 2-word chunks
-        // len=1 → size=2
-        return len * 2;
+        
+        // No TS3 encoding: this is an atomic struct
+        // Check if bit 3 is set (indicates even-field atomic struct)
+        if (header & 0x8) {
+            // Bit 3 set: atomic struct with even fields, size = len + 1
+            // This handles 2-field structs: header=8, len=1, size=2
+            return len + 1;
+        }
+        
+        // Bit 3 not set: atomic struct with odd number of fields
+        // This handles 3-field structs: header=24, len=3, size=3
+        return len;
     }
     
     // For arrays: len is the array length
@@ -251,26 +261,35 @@ static void print_header_log(uintptr_t header) {
         }
     } else if (tag == TAG_STRUCT_ATOMIC) {
         // Tag 0: could be atomic struct OR struct with pointers (TS3 encoding)
+        
+        // First check if upper bits encode a size (TS3 encoding for structs with pointers)
         long size = len >> 5;
         long ptr_bitmap = len & 0x1F;
         
         if (size > 0) {
-            // This is a struct with pointers using TS3 encoding (bitmap is actual bitmap)
+            // This is a struct with pointers using TS3 encoding
             if (ptr_bitmap == 0) {
                 std::cout << "[Struct, size = " << size << ", ptr offsets = none]";
             } else {
-                // TS3: bitmap seems to be shifted - bit 0 represents offset 1, bit 1 represents offset 2, etc.
+                // TS3: bitmap is shifted - bit 0 represents offset 1, etc.
                 std::cout << "[Struct, size = " << size << ", ptr offsets =";
                 for (int i = 0; i < 5; ++i) {
                     if (ptr_bitmap & (1 << i)) {
-                        std::cout << " " << (i + 1);  // Print i+1, not i
+                        std::cout << " " << (i + 1);
                     }
                 }
                 std::cout << "]";
             }
         } else {
-            // Atomic struct: len encodes size in 2-word chunks
-            std::cout << "[Struct, size = " << (len * 2) << ", ptr offsets = none]";
+            // Not TS3: this is an atomic struct
+            // Check if bit 3 is set (even-field atomic struct)
+            if (header & 0x8) {
+                // Bit 3 set: atomic struct with even fields, size = len + 1
+                std::cout << "[Struct, size = " << (len + 1) << ", ptr offsets = none]";
+            } else {
+                // Bit 3 not set: atomic struct with odd number of fields, size = len
+                std::cout << "[Struct, size = " << len << ", ptr offsets = none]";
+            }
         }
     } else {
         // Unknown tag
