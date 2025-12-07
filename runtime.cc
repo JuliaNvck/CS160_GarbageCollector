@@ -204,6 +204,18 @@ static size_t get_payload_words(uintptr_t header) {
     if (tag == TAG_STRUCT_PTRS) {
         long size = len >> 5;
         long ptr_offsets = len & 0x1F;
+        
+        // If size == 0, this might actually be an atomic struct (no pointers)
+        // The codegen seems to use tag=4 for some atomic structs
+        if (size == 0) {
+            // Atomic struct with tag=4: different encoding than tag=0
+            // For tag=4 atomic structs, bit 3 indicates: size = len + 2
+            if (header & 0x8) {
+                return len + 2;
+            }
+            return len;
+        }
+        
         return size;
     }
     
@@ -245,10 +257,21 @@ static void print_header_log(uintptr_t header) {
                   << ((tag == TAG_ARRAY_PTRS) ? "true" : "false") << "]";
     } else if (tag == TAG_STRUCT_PTRS) {
         // Tag 4 is used for structs with pointers (TS4 encoding)
+        // BUT also for atomic structs in some cases
         long size = len >> 5;
         long ptr_bitmap = len & 0x1F;
         
-        if (ptr_bitmap == 0) {
+        if (size == 0) {
+            // This is actually an atomic struct with tag=4
+            // For tag=4 atomic structs: bit 3 set means size = len + 2
+            long actual_size;
+            if (header & 0x8) {
+                actual_size = len + 2;
+            } else {
+                actual_size = len;
+            }
+            std::cout << "[Struct, size = " << actual_size << ", ptr offsets = none]";
+        } else if (ptr_bitmap == 0) {
             std::cout << "[Struct, size = " << size << ", ptr offsets = none]";
         } else {
             // TS4: bitmap value N means first N+1 fields are pointers
