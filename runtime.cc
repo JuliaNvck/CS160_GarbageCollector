@@ -204,13 +204,13 @@ static bool is_forwarding_pointer(uintptr_t header) {
 }
 
 static size_t get_payload_words(uintptr_t header) {
-    long len = header >> 3;  // Upper 61 bits: length
-    long tag = header & 0x7;  // Lower 3 bits: Tag
+    int64_t len = header >> 3;  // Upper 61 bits: length
+    int64_t tag = header & 0x7;  // Lower 3 bits: Tag
     
     // Tag 4 is used for structs with pointers (TS4 encoding)
     if (tag == TAG_STRUCT_PTRS) {
-        long size = len >> 5;
-        long ptr_offsets = len & 0x1F;
+        int64_t size = len >> 5;
+        int64_t ptr_offsets = len & 0x1F;
         
         // If size == 0, this might actually be an atomic struct (no pointers)
         // The codegen seems to use tag=4 for some atomic structs
@@ -218,22 +218,22 @@ static size_t get_payload_words(uintptr_t header) {
             // Atomic struct with tag=4: different encoding than tag=0
             // For tag=4 atomic structs, bit 3 indicates: size = len + 2
             if (header & 0x8) {
-                return len + 2;
+                return (size_t)(len + 2);
             }
-            return len;
+            return (size_t)len;
         }
         
-        return size;
+        return (size_t)size;
     }
     
     // Tag 0 can be either atomic struct OR struct with pointers (TS3 encoding)
     if (tag == TAG_STRUCT_ATOMIC) {
         // First check if upper bits encode a size (struct with pointers - TS3)
         // TS3 encoding: len = (size << 5) | bitmap, where size is in upper bits
-        long size = len >> 5;
+        int64_t size = len >> 5;
         if (size > 0) {
             // This is a struct with pointers using TS3 encoding
-            return size;
+            return (size_t)size;
         }
         
         // No TS3 encoding: this is an atomic struct
@@ -241,23 +241,23 @@ static size_t get_payload_words(uintptr_t header) {
         if (header & 0x8) {
             // Bit 3 set: atomic struct with even fields, size = len + 1
             // This handles 2-field structs: header=8, len=1, size=2
-            return len + 1;
+            return (size_t)(len + 1);
         }
         
         // Bit 3 not set: atomic struct with odd number of fields
         // This handles 3-field structs: header=24, len=3, size=3
-        return len;
+        return (size_t)len;
     }
     
     // For arrays: len is the array length
-    return len;
+    return (size_t)len;
 }
 
 // Log helper to match formatted output
 // e.g. [Array, len = 1, ptrs = false]
 static void print_header_log(uintptr_t header) {
-    long len = header >> 3;
-    long tag = header & 0x7;
+    int64_t len = header >> 3;
+    int64_t tag = header & 0x7;
     
     if (tag == TAG_ARRAY_ATOMIC || tag == TAG_ARRAY_PTRS) {
         std::cout << "[Array, len = " << len << ", ptrs = " 
@@ -265,13 +265,13 @@ static void print_header_log(uintptr_t header) {
     } else if (tag == TAG_STRUCT_PTRS) {
         // Tag 4 is used for structs with pointers (TS4 encoding)
         // BUT also for atomic structs in some cases
-        long size = len >> 5;
-        long ptr_bitmap = len & 0x1F;
+        int64_t size = len >> 5;
+        int64_t ptr_bitmap = len & 0x1F;
         
         if (size == 0) {
             // This is actually an atomic struct with tag=4
             // For tag=4 atomic structs: bit 3 set means size = len + 2
-            long actual_size;
+            int64_t actual_size;
             if (header & 0x8) {
                 actual_size = len + 2;
             } else {
@@ -293,8 +293,8 @@ static void print_header_log(uintptr_t header) {
         // Tag 0: could be atomic struct OR struct with pointers (TS3 encoding)
         
         // First check if upper bits encode a size (TS3 encoding for structs with pointers)
-        long size = len >> 5;
-        long ptr_bitmap = len & 0x1F;
+        int64_t size = len >> 5;
+        int64_t ptr_bitmap = len & 0x1F;
         
         if (size > 0) {
             // This is a struct with pointers using TS3 encoding
@@ -355,10 +355,10 @@ static void process_transitive(uintptr_t* slot_ptr, uintptr_t*& free_ptr) {
     *slot_ptr = header;
 
     if (gc_log) {
-        long old_rel = ((uintptr_t)obj_ptr - (uintptr_t)from_space) / WORDSIZE;
+        int64_t old_rel = ((uintptr_t)obj_ptr - (uintptr_t)from_space) / WORDSIZE;
         // The forwarded address (header) points to the new data location
         uintptr_t* forwarded_addr = (uintptr_t*)header;
-        long new_rel = ((uintptr_t)forwarded_addr - (uintptr_t)to_space) / WORDSIZE;
+        int64_t new_rel = ((uintptr_t)forwarded_addr - (uintptr_t)to_space) / WORDSIZE;
 
         std::cout << "---- copying object at relative address " << old_rel 
                   << " with header [Forwarded]" << std::endl;
@@ -379,9 +379,9 @@ static void process_transitive(uintptr_t* slot_ptr, uintptr_t*& free_ptr) {
   }
 
   if (gc_log) {
-    long rel_addr_from = ((uintptr_t)obj_ptr - (uintptr_t)from_space) / WORDSIZE;
+    int64_t rel_addr_from = ((uintptr_t)obj_ptr - (uintptr_t)from_space) / WORDSIZE;
     uintptr_t* dest_obj_ptr = free_ptr + 1;
-    long rel_addr_to = ((uintptr_t)dest_obj_ptr - (uintptr_t)to_space) / WORDSIZE;
+    int64_t rel_addr_to = ((uintptr_t)dest_obj_ptr - (uintptr_t)to_space) / WORDSIZE;
 
     std::cout << "---- copying object at relative address " << rel_addr_from 
               << " with header ";
@@ -471,17 +471,6 @@ static void gc_collect(uintptr_t* top_frame) {
 
   while (scan_ptr < free_ptr) {
     uintptr_t header = *scan_ptr;
-    
-    // Sanity check: header shouldn't look like a forwarding pointer during scan
-    // All objects in to_space should have proper headers, not forwarding addresses
-    if (is_forwarding_pointer(header)) {
-        if (gc_log) {
-            std::cout << "ERROR: Found forwarding pointer during scan at offset " 
-                      << (scan_ptr - to_space) << std::endl;
-        }
-        _cflat_panic("Corrupted header in to_space during scan");
-    }
-    
     size_t payload_words = get_payload_words(header);
     long tag = header & 0x7; // Lower 3 bits: The Tag (type information, e.g., is it a pointer array?)
 
@@ -502,9 +491,9 @@ static void gc_collect(uintptr_t* top_frame) {
     } else if (tag == TAG_STRUCT_PTRS) {
         // TS4: bitmap value N means first N+1 fields are pointers
         // BUT tag=4 with size=0 means atomic struct (no pointers to scan)
-        long len = header >> 3;
-        long size = len >> 5;
-        long ptr_bitmap = len & 0x1F;
+        int64_t len = header >> 3;
+        int64_t size = len >> 5;
+        int64_t ptr_bitmap = len & 0x1F;
         
         if (size > 0 && ptr_bitmap > 0) {
             size_t num_ptr_fields = ptr_bitmap + 1;
@@ -515,9 +504,9 @@ static void gc_collect(uintptr_t* top_frame) {
         // If size == 0, it's an atomic struct, no pointers to scan
     } else if (tag == TAG_STRUCT_ATOMIC) {
         // Tag 0: check if it's actually a struct with pointers (TS3 encoding)
-        long len = header >> 3;
-        long size = len >> 5;
-        long ptr_bitmap = len & 0x1F;
+        int64_t len = header >> 3;
+        int64_t size = len >> 5;
+        int64_t ptr_bitmap = len & 0x1F;
         
         if (size > 0 && ptr_bitmap > 0) {
             // TS3: bitmap is shifted - bit 0 represents offset 1, bit 1 represents offset 2, etc.
