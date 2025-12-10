@@ -417,6 +417,12 @@ static void process_transitive(uintptr_t* slot_ptr, uintptr_t*& free_ptr) {
 
   // 6. Bump Free Pointer
   free_ptr += copy_size_words;
+  
+  // Sanity check: ensure we haven't overflowed to_space
+  uintptr_t* to_end = to_space + heap_size / 2;
+  if (free_ptr > to_end) {
+      _cflat_panic("free_ptr exceeded to_space bounds during GC");
+  }
 
 }
 
@@ -472,7 +478,18 @@ static void gc_collect(uintptr_t* top_frame) {
   while (scan_ptr < free_ptr) {
     uintptr_t header = *scan_ptr;
     size_t payload_words = get_payload_words(header);
-    long tag = header & 0x7; // Lower 3 bits: The Tag (type information, e.g., is it a pointer array?)
+    int64_t tag = header & 0x7; // Lower 3 bits: The Tag (type information, e.g., is it a pointer array?)
+    
+    // Sanity check: ensure the object fits within allocated space
+    if (scan_ptr + 1 + payload_words > free_ptr) {
+        if (gc_log) {
+            std::cout << "ERROR: Object at scan_ptr extends beyond free_ptr" << std::endl;
+            std::cout << "scan_ptr offset: " << (scan_ptr - to_space) << std::endl;
+            std::cout << "payload_words: " << payload_words << std::endl;
+            std::cout << "free_ptr offset: " << (free_ptr - to_space) << std::endl;
+        }
+        _cflat_panic("Corrupted object size in to_space");
+    }
 
     if (gc_log) {
       std::cout << "-- scanning header ";
@@ -510,10 +527,12 @@ static void gc_collect(uintptr_t* top_frame) {
         
         if (size > 0 && ptr_bitmap > 0) {
             // TS3: bitmap is shifted - bit 0 represents offset 1, bit 1 represents offset 2, etc.
-            for (size_t i = 0; i < payload_words && i < 5; ++i) {
-                // Check bit i for offset i+1
-                if (i < payload_words - 1 && (ptr_bitmap & (1 << i))) {
-                    process_transitive(&fields[i + 1], free_ptr);
+            // We need to check all possible offsets: 1 through payload_words-1
+            // That's bits 0 through payload_words-2, but bitmap is only 5 bits
+            for (size_t offset = 1; offset < payload_words && offset < 6; ++offset) {
+                // Check bit (offset-1) for this offset
+                if (ptr_bitmap & (1 << (offset - 1))) {
+                    process_transitive(&fields[offset], free_ptr);
                 }
             }
         }
@@ -524,6 +543,12 @@ static void gc_collect(uintptr_t* top_frame) {
     if (gc_log) {
       std::cout << "-- incrementing scanning ptr by " << size << std::endl;
     }
+    
+    // Sanity check: make sure we don't go beyond free_ptr
+    if (scan_ptr + size > free_ptr) {
+        _cflat_panic("Scan pointer would exceed allocated space");
+    }
+    
     scan_ptr += size;
   }
 
