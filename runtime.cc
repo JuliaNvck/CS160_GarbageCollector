@@ -94,6 +94,7 @@ extern "C" void _cflat_init_gc() {
 
   // initialize `heap_size` from the string retrieved from the environment,
   // checking that it is a legal value.
+  heap_size = 0;
   if (std::all_of(heap_size_str.cbegin(), heap_size_str.cend(), ::isdigit)) {
     heap_size = stoi(heap_size_str, nullptr, 10);
   }
@@ -471,15 +472,18 @@ static void gc_collect(uintptr_t* top_frame) {
         }
     } else if (tag == TAG_STRUCT_PTRS) {
         // TS4: bitmap value N means first N+1 fields are pointers
+        // BUT tag=4 with size=0 means atomic struct (no pointers to scan)
         long len = header >> 3;
+        long size = len >> 5;
         long ptr_bitmap = len & 0x1F;
         
-        if (ptr_bitmap > 0) {
+        if (size > 0 && ptr_bitmap > 0) {
             size_t num_ptr_fields = ptr_bitmap + 1;
             for (size_t i = 0; i < num_ptr_fields && i < payload_words; ++i) {
                 process_transitive(&fields[i], free_ptr);
             }
         }
+        // If size == 0, it's an atomic struct, no pointers to scan
     } else if (tag == TAG_STRUCT_ATOMIC) {
         // Tag 0: check if it's actually a struct with pointers (TS3 encoding)
         long len = header >> 3;
