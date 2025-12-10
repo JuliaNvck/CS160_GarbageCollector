@@ -105,6 +105,12 @@ extern "C" void _cflat_init_gc() {
   // initialize from_space, to_space, and bump_ptr.
   from_space = (uintptr_t*)malloc(heap_size * WORDSIZE);
   if (!from_space) { _cflat_panic("unsuccessful allocation of heap."); }
+  
+  // CRITICAL: Zero out the entire heap to avoid reading garbage data
+  // Different systems may have different malloc behavior, so we must ensure
+  // both semispaces start with zeros to avoid treating garbage as headers
+  memset(from_space, 0, heap_size * WORDSIZE);
+  
   to_space = from_space + heap_size / 2;
   bump_ptr = from_space;
 
@@ -363,6 +369,14 @@ static void process_transitive(uintptr_t* slot_ptr, uintptr_t*& free_ptr) {
   }
 
   size_t payload_words = get_payload_words(header);
+  
+  // Sanity check: payload should be reasonable
+  if (payload_words > heap_size) {
+      if (gc_log) {
+          std::cout << "WARNING: Invalid payload_words = " << payload_words << std::endl;
+      }
+      _cflat_panic("Invalid object size detected");
+  }
 
   if (gc_log) {
     long rel_addr_from = ((uintptr_t)obj_ptr - (uintptr_t)from_space) / WORDSIZE;
@@ -427,10 +441,14 @@ static void gc_collect(uintptr_t* top_frame) {
             std::cout << "gc: processing stack frame " << frame_idx 
                       << " (from top of stack), with " << gc_root_count << " pointers" << std::endl;
         }
+    // Sanity check: gc_root_count should be reasonable
+    if (gc_root_count < 0 || gc_root_count > 1000) {
+        _cflat_panic("Invalid gc_root_count in stack frame");
+    }
     // Roots are stored below the GC header
     // GC header is at -1 word
     // First root (index 0) is at -2 words (-16 bytes) -- > root i is at frame - 2 - i
-    for (size_t i = 0; i < gc_root_count; ++i) {
+    for (int64_t i = 0; i < gc_root_count; ++i) {
       if (gc_log) {
           std::cout << "-- processing pointer offset " << i << std::endl;
       }
@@ -453,6 +471,17 @@ static void gc_collect(uintptr_t* top_frame) {
 
   while (scan_ptr < free_ptr) {
     uintptr_t header = *scan_ptr;
+    
+    // Sanity check: header shouldn't look like a forwarding pointer during scan
+    // All objects in to_space should have proper headers, not forwarding addresses
+    if (is_forwarding_pointer(header)) {
+        if (gc_log) {
+            std::cout << "ERROR: Found forwarding pointer during scan at offset " 
+                      << (scan_ptr - to_space) << std::endl;
+        }
+        _cflat_panic("Corrupted header in to_space during scan");
+    }
+    
     size_t payload_words = get_payload_words(header);
     long tag = header & 0x7; // Lower 3 bits: The Tag (type information, e.g., is it a pointer array?)
 
